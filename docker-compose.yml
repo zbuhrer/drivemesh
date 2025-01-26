@@ -1,0 +1,31 @@
+services:
+  osm-tile-server:
+    image: overv/openstreetmap-tile-server
+    volumes:
+      - ./data/osm:/data/osm
+      - ./data/tiles:/data/tiles
+    ports:
+      - "8080:80"
+    environment:
+      - DOWNLOAD_PBF=https://download.geofabrik.de/north-america/us-south-latest.osm.pbf
+      - DOWNLOAD_THREADS=4
+      - THREADS=4
+    command: "import"
+
+  drivemesh-fe:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - osm-tile-server
+
+  drivemesh-be:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    depends_on:
+      - osm-tile-server
